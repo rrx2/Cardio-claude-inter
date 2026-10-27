@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asse cardiaco: I, aVF, II</title>
+<style>
+:root{--text-primary:#1f1f1e;--text-secondary:#5f5e5a;--text-muted:#888780;--border-strong:#b4b2a9;--surface-1:#f1efe8;--radius:8px;
+--bg-success:#eaf3de;--text-success:#27500a;--bg-warning:#faeeda;--text-warning:#633806;--bg-danger:#fceaea;--text-danger:#791f1f}
+@media (prefers-color-scheme:dark){:root{--text-primary:#e8e6dc;--text-secondary:#b4b2a9;--text-muted:#888780;--border-strong:#5f5e5a;--surface-1:#2c2c2a;
+--bg-success:#27500a;--text-success:#c0dd97;--bg-warning:#633806;--text-warning:#fac775;--bg-danger:#791f1f;--text-danger:#f7c1c1}}
+html,body{margin:0;background:transparent;color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{padding:12px 16px}
+.ts{font-size:12px;fill:var(--text-secondary)}
+input[type=range]{accent-color:#534AB7}
+</style>
+</head>
+<body>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+<svg viewBox="0 0 380 380" style="flex:1 1 300px;max-width:380px" role="img"><title>Cerchio degli assi</title><desc>Vettore dell'asse con le derivazioni I, II e aVF</desc>
+<path id="wN" fill="#1D9E75" opacity="0.18"/>
+<path id="wL" fill="#EF9F27" opacity="0.28"/>
+<circle cx="190" cy="190" r="130" fill="none" stroke="var(--border-strong)" stroke-width="1"/>
+<line x1="60" y1="190" x2="320" y2="190" stroke="var(--text-muted)" stroke-width="0.5"/>
+<line x1="190" y1="60" x2="190" y2="320" stroke="var(--text-muted)" stroke-width="0.5"/>
+<line id="l2" stroke="var(--text-muted)" stroke-width="0.5"/>
+<line id="cut" stroke="#D85A30" stroke-width="1" stroke-dasharray="4 4"/>
+<line id="vec" stroke="#534AB7" stroke-width="3" stroke-linecap="round"/>
+<circle id="tip" r="5" fill="#534AB7"/>
+<text class="ts" x="324" y="194">I 0°</text>
+<text class="ts" x="190" y="342" text-anchor="middle">aVF +90°</text>
+<text class="ts" x="190" y="50" text-anchor="middle">−90°</text>
+<text class="ts" x="54" y="194" text-anchor="end">±180°</text>
+<text class="ts" id="t2">II +60°</text>
+<text class="ts" id="tm" style="fill:#D85A30">−30°</text>
+<text class="ts" id="tp" style="fill:#D85A30" text-anchor="end">+150°</text>
+</svg>
+<div style="flex:1 1 240px;min-width:220px">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+<span style="font-size:13px;color:var(--text-secondary)">Angolo</span>
+<input type="range" id="a" min="-180" max="180" step="1" value="-60" style="flex:1">
+<span id="av" style="font-size:14px;font-weight:500;min-width:48px;text-align:right">−60°</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px">
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:8px 10px"><div style="font-size:12px;color:var(--text-secondary)">I</div><div id="sI" style="font-size:20px;font-weight:500"></div></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:8px 10px"><div style="font-size:12px;color:var(--text-secondary)">aVF</div><div id="sF" style="font-size:20px;font-weight:500"></div></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:8px 10px"><div style="font-size:12px;color:var(--text-secondary)">II</div><div id="sII" style="font-size:20px;font-weight:500"></div></div>
+</div>
+<div id="zone" style="border-radius:var(--radius);padding:10px 12px;font-size:14px;font-weight:500"></div>
+<div style="font-size:12px;color:var(--text-secondary);margin-top:10px;line-height:1.5">Verde: asse normale (da −30° a +90°). Arancio: deviazione sinistra (da −90° a −30°). La linea tratteggiata passa per −30° e +150°: da un lato II è positiva, dall'altro negativa. Strumento didattico.</div>
+</div>
+</div>
+<script>
+var C=190,R=130;
+function pt(d,r){var t=d*Math.PI/180;return [C+r*Math.cos(t),C+r*Math.sin(t)];}
+function wedge(a,b){var p=pt(a,R),q=pt(b,R);return 'M'+C+' '+C+' L'+p[0]+' '+p[1]+' A'+R+' '+R+' 0 0 1 '+q[0]+' '+q[1]+' Z';}
+function sg(x){return Math.abs(x)<0.05?'≈ 0':(x>0?'+':'−');}
+function el(i){return document.getElementById(i);}
+function set(id,k,v){el(id).setAttribute(k,v);}
+set('wN','d',wedge(-30,90));set('wL','d',wedge(-90,-30));
+var p=pt(60,R);set('l2','x1',C-(p[0]-C));set('l2','y1',C-(p[1]-C));set('l2','x2',p[0]);set('l2','y2',p[1]);
+var a1=pt(-30,R),a2=pt(150,R);set('cut','x1',a1[0]);set('cut','y1',a1[1]);set('cut','x2',a2[0]);set('cut','y2',a2[1]);
+var q=pt(60,R+8);set('t2','x',q[0]);set('t2','y',q[1]+12);
+q=pt(-30,R+6);set('tm','x',q[0]);set('tm','y',q[1]);
+q=pt(150,R+6);set('tp','x',q[0]);set('tp','y',q[1]+10);
+function upd(){
+ var d=+el('a').value,t=d*Math.PI/180,e=pt(d,R);
+ set('vec','x1',C);set('vec','y1',C);set('vec','x2',e[0]);set('vec','y2',e[1]);
+ set('tip','cx',e[0]);set('tip','cy',e[1]);
+ el('av').textContent=(d>0?'+':d<0?'−':'')+Math.abs(d)+'°';
+ var cI=Math.cos(t),cF=Math.sin(t),c2=Math.cos(t-Math.PI/3);
+ el('sI').textContent=sg(cI);el('sF').textContent=sg(cF);el('sII').textContent=sg(c2);
+ var z,bg,col;
+ if(d>=-30&&d<=90){z='Asse normale';bg='var(--bg-success)';col='var(--text-success)';}
+ else if(d>=-90&&d<-30){z='Deviazione sinistra';bg='var(--bg-warning)';col='var(--text-warning)';}
+ else if(d>90){z='Deviazione destra';bg='var(--bg-danger)';col='var(--text-danger)';}
+ else{z='Asse estremo (nord-ovest)';bg='var(--bg-danger)';col='var(--text-danger)';}
+ var zn=el('zone');zn.textContent=z;zn.style.background=bg;zn.style.color=col;
+}
+el('a').addEventListener('input',upd);upd();
+</script>
+</body>
+</html>
