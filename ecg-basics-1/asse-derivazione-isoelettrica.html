@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asse e derivazione isoelettrica</title>
+<script>
+// Tema forzato da ?theme=dark|light (la modalità notte di Anki non cambia prefers-color-scheme nell'iframe).
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+:root{--text-primary:#1f1f1e;--text-secondary:#5f5e5a;--text-muted:#888780;--border-strong:#b4b2a9;--surface-1:#f1efe8;--radius:8px;
+--accent:#534AB7;--c-green:#1D9E75;--c-orange:#EF9F27;--c-red:#D85A30;--grid:#e3e0d6;
+--bg-success:#eaf3de;--text-success:#27500a;--bg-warning:#faeeda;--text-warning:#633806;--bg-danger:#fceaea;--text-danger:#791f1f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--text-primary:#e8e6dc;--text-secondary:#b4b2a9;--text-muted:#888780;--border-strong:#5f5e5a;--surface-1:#2c2c2a;
+--accent:#afa9ec;--grid:#3a3a37;
+--bg-success:#27500a;--text-success:#c0dd97;--bg-warning:#633806;--text-warning:#fac775;--bg-danger:#791f1f;--text-danger:#f7c1c1}}
+:root[data-theme=dark]{--text-primary:#e8e6dc;--text-secondary:#b4b2a9;--text-muted:#888780;--border-strong:#5f5e5a;--surface-1:#2c2c2a;
+--accent:#afa9ec;--grid:#3a3a37;
+--bg-success:#27500a;--text-success:#c0dd97;--bg-warning:#633806;--text-warning:#fac775;--bg-danger:#791f1f;--text-danger:#f7c1c1}
+html,body{margin:0;background:transparent;color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{padding:12px 16px}
+#app{max-width:720px;margin:0 auto}
+svg,canvas{display:block;max-width:100%}
+button,input,select{font:inherit;color:inherit;accent-color:var(--accent)}
+.note{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-top:12px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+h2{font-size:17px;margin:18px 0 6px}
+h2:first-child{margin-top:0}
+p.lead{font-size:14px;line-height:1.5;color:var(--text-secondary);margin:0 0 10px}
+.row{display:flex;gap:16px;align-items:flex-start}
+.row>.wheel{flex:0 0 46%}
+.row>.side{flex:1;min-width:0}
+@media (max-width:600px){.row{flex-direction:column}.row>.wheel{flex:none;width:100%;max-width:360px;margin:0 auto}}
+.wheel svg{width:100%;height:auto;touch-action:none;cursor:pointer}
+.ctrl{display:flex;align-items:center;gap:10px;font-size:14px;margin:6px 0 10px;flex-wrap:wrap}
+.ctrl input[type=range]{flex:1;min-width:140px;height:32px}
+.big{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:var(--surface-1);color:var(--text-secondary)}
+.tag.ok{background:var(--bg-success);color:var(--text-success)}
+.tag.warn{background:var(--bg-warning);color:var(--text-warning)}
+.tag.bad{background:var(--bg-danger);color:var(--text-danger)}
+.leads{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lc{border:1px solid var(--border-strong);border-radius:var(--radius);padding:4px 4px 2px}
+.lc.iso{border-color:var(--c-orange);box-shadow:0 0 0 1px var(--c-orange)}
+.lc .h{display:flex;justify-content:space-between;font-size:12px;font-weight:600}
+.lc .h span:last-child{font-weight:400;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.lc svg{width:100%;height:auto}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.btns button{min-height:34px;min-width:52px;padding:4px 10px;border:1px solid var(--border-strong);border-radius:var(--radius);background:transparent;cursor:pointer}
+.btns button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme=dark] .btns button[aria-pressed=true]{color:#1f1f1e}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .btns button[aria-pressed=true]{color:#1f1f1e}}
+.step{font-size:14px;line-height:1.55;margin:8px 0}
+.step b.n{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:var(--accent);color:var(--surface-1);font-size:12px;margin-right:6px}
+.res{padding:8px 10px;border-radius:var(--radius);background:var(--bg-success);color:var(--text-success);font-size:14px;line-height:1.5}
+.lbl{font-size:13px;color:var(--text-secondary)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<h2>1 · Esplora: l'asse e le sei derivazioni</h2>
+<p class="lead">Trascina sulla ruota (o usa lo slider). Ogni derivazione "vede" la proiezione del vettore sul proprio asse: positiva se il vettore va verso il suo polo +, nulla se è perpendicolare. La derivazione evidenziata in arancione è quella quasi isoelettrica.</p>
+<div class="ctrl"><label for="ax">Asse</label><input id="ax" type="range" min="-180" max="180" step="5" value="60"><span class="big" id="axv">+60°</span><span class="tag" id="axc"></span></div>
+<div class="row">
+  <div class="wheel"><svg id="w1" viewBox="0 0 360 360" role="img"><title>Sistema esassiale</title><desc>Le sei derivazioni degli arti con il vettore dell'asse elettrico, orientabile trascinando.</desc></svg></div>
+  <div class="side"><div class="leads" id="leads"></div>
+  <p class="note" style="margin-top:8px">Ampiezza netta del QRS ∝ cos(asse − angolo della derivazione). A 90° di distanza il coseno è 0: R e S uguali, QRS equifasico.</p></div>
+</div>
+
+<h2>2 · Risolvi: dalla derivazione isoelettrica all'asse</h2>
+<p class="lead">Ogni derivazione degli arti è perpendicolare a un'altra: I ⊥ aVF, II ⊥ aVL, III ⊥ aVR. Scegli quale è isoelettrica, poi il segno del QRS nella sua perpendicolare.</p>
+<div class="lbl">Derivazione isoelettrica</div>
+<div class="btns" id="isoB"></div>
+<div class="row">
+  <div class="wheel"><svg id="w2" viewBox="0 0 360 360" role="img"><title>Metodo della derivazione isoelettrica</title><desc>La derivazione isoelettrica, la sua perpendicolare con le due direzioni candidate e l'asse risultante.</desc></svg></div>
+  <div class="side">
+    <div class="step" id="s1"></div>
+    <div class="step" id="s2"></div>
+    <div class="btns" id="sgnB"></div>
+    <div class="res" id="res"></div>
+  </div>
+</div>
+
+<div class="note">Angoli nella convenzione esassiale: 0° a sinistra (I), positivi in senso orario verso il basso (aVF = +90°), negativi verso l'alto. Asse normale: −30° / +90° (alcuni testi arrivano a +100°); deviazione sinistra −30° / −90°; destra +90° / +180°; estrema −90° / ±180°. Una derivazione "isoelettrica" fissa l'asse con un'approssimazione di circa ±10–15°.</div>
+<div class="note">Strumento didattico.</div>
+</div>
+<script>
+// Cornice: tema dalla carta Anki e altezza alla pagina che contiene l'iframe. Non toccare.
+(function(){
+  window.addEventListener('message',function(e){
+    var t=e.data&&e.data.schemaTheme;
+    if((t==='dark'||t==='light')&&!new URLSearchParams(location.search).get('theme'))document.documentElement.setAttribute('data-theme',t);
+  });
+  if(window.parent===window)return;
+  var last=0;
+  // L'altezza del body, non lo scrollHeight della pagina: quello non scende mai sotto l'altezza dell'iframe.
+  function send(){var h=Math.ceil(document.body.getBoundingClientRect().height);if(h!==last){last=h;window.parent.postMessage({schemaHeight:h},'*');}}
+  new ResizeObserver(send).observe(document.body);
+  window.addEventListener('load',send);
+})();
+</script>
+<script>
+(function(){
+var NS='http://www.w3.org/2000/svg',C=180,R=128;
+var LEADS=[{n:'I',a:0},{n:'II',a:60},{n:'III',a:120},{n:'aVR',a:-150},{n:'aVL',a:-30},{n:'aVF',a:90}];
+var PERP={I:'aVF',aVF:'I',II:'aVL',aVL:'II',III:'aVR',aVR:'III'};
+function byName(n){for(var i=0;i<LEADS.length;i++)if(LEADS[i].n===n)return LEADS[i];}
+function norm(a){a=((a+180)%360+360)%360-180;return a===-180?180:a;}
+function fmt(a){a=norm(Math.round(a));return a===180?'±180°':(a>0?'+':a<0?'−':'')+Math.abs(a)+'°';}
+function pt(a,r){var t=a*Math.PI/180;return [C+r*Math.cos(t),C+r*Math.sin(t)];}
+function el(tag,at,par){var e=document.createElementNS(NS,tag);for(var k in at)e.setAttribute(k,at[k]);if(par)par.appendChild(e);return e;}
+function clearKeep(svg){Array.prototype.slice.call(svg.childNodes).forEach(function(c){if(c.nodeName!=='title'&&c.nodeName!=='desc')svg.removeChild(c);});}
+function classify(a){a=norm(a);
+  if(a>=-30&&a<=90)return['Normale','ok'];
+  if(a<-30&&a>=-90)return['Deviazione sinistra','warn'];
+  if(a>90)return['Deviazione destra','warn'];
+  return['Deviazione estrema','bad'];}
+
+// Disegno della ruota esassiale. opt: {axis, hi:{nome:colore}, cand:[angoli], arrow:colore}
+function wheel(svg,opt){
+  clearKeep(svg);
+  el('circle',{cx:C,cy:C,r:R,fill:'none',stroke:'var(--grid)','stroke-width':1},svg);
+  LEADS.forEach(function(L){
+    var col=(opt.hi&&opt.hi[L.n])||'var(--border-strong)',w=opt.hi&&opt.hi[L.n]?2.5:1.2;
+    var p=pt(L.a,R),m=pt(L.a+180,R);
+    el('line',{x1:C,y1:C,x2:p[0],y2:p[1],stroke:col,'stroke-width':w},svg);
+    el('line',{x1:C,y1:C,x2:m[0],y2:m[1],stroke:col,'stroke-width':w,'stroke-dasharray':'4 4'},svg);
+    var t=pt(L.a,R+22),tx=el('text',{x:t[0],y:t[1]+4,'text-anchor':'middle','font-size':13,'font-weight':600,fill:(opt.hi&&opt.hi[L.n])||'var(--text-primary)'},svg);
+    tx.textContent=L.n;
+    var t2=pt(L.a,R-12);el('text',{x:t2[0],y:t2[1]+3,'text-anchor':'middle','font-size':10,fill:'var(--text-muted)'},svg).textContent=fmt(L.a);
+  });
+  (opt.cand||[]).forEach(function(c){
+    var p=pt(c.a,R);
+    el('circle',{cx:p[0],cy:p[1],r:9,fill:c.ok?'var(--c-green)':'none',stroke:c.ok?'var(--c-green)':'var(--text-muted)','stroke-width':2,'stroke-dasharray':c.ok?'':'3 3'},svg);
+    var q=pt(c.a+16,R-34),bg=el('rect',{x:q[0]-21,y:q[1]-9,width:42,height:17,rx:4,fill:'var(--surface-1)'},svg);
+    el('text',{x:q[0],y:q[1]+4,'text-anchor':'middle','font-size':12,'font-weight':600,fill:c.ok?'var(--c-green)':'var(--text-muted)','text-decoration':c.ok?'':'line-through'},svg).textContent=fmt(c.a);
+  });
+  if(opt.axis!=null){
+    var col=opt.arrow||'var(--accent)',tip=pt(opt.axis,R-6),b1=pt(opt.axis-7,R-24),b2=pt(opt.axis+7,R-24),s=pt(opt.axis,R-20);
+    el('line',{x1:C,y1:C,x2:s[0],y2:s[1],stroke:col,'stroke-width':4,'stroke-linecap':'round'},svg);
+    el('polygon',{points:tip.join(',')+' '+b1.join(',')+' '+b2.join(','),fill:col},svg);
+  }
+  el('circle',{cx:C,cy:C,r:4,fill:'var(--text-primary)'},svg);
+}
+
+// Mini QRS: R e S proporzionali alla proiezione p∈[−1,1]; equifasico a p=0.
+function qrs(svg,p){
+  clearKeep(svg);var b=40,H=30,r=H*(0.5+0.5*p),s=H*(0.5-0.5*p);
+  for(var x=0;x<=100;x+=10)el('line',{x1:x,y1:4,x2:x,y2:76,stroke:'var(--grid)','stroke-width':0.6},svg);
+  for(var y=10;y<=70;y+=10)el('line',{x1:0,y1:y,x2:100,y2:y,stroke:'var(--grid)','stroke-width':0.6},svg);
+  var d='M0 '+b+' L30 '+b+' L36 '+(b-r)+' L42 '+(b+s)+' L48 '+b+' L62 '+b+' Q70 '+(b-6*(p>=-0.2?1:-1))+' 78 '+b+' L100 '+b;
+  el('path',{d:d,fill:'none',stroke:'var(--text-primary)','stroke-width':1.6,'stroke-linejoin':'round'},svg);
+}
+
+// --- Parte 1 ---
+var ax=document.getElementById('ax'),axv=document.getElementById('axv'),axc=document.getElementById('axc'),w1=document.getElementById('w1'),box=document.getElementById('leads'),cards={};
+LEADS.forEach(function(L){
+  var d=document.createElement('div');d.className='lc';
+  d.innerHTML='<div class="h"><span>'+L.n+'</span><span></span></div>';
+  var s=el('svg',{viewBox:'0 0 100 80',role:'img'});el('title',{},s).textContent='QRS in '+L.n;
+  d.appendChild(s);box.appendChild(d);cards[L.n]={d:d,s:s,v:d.querySelector('.h span:last-child')};
+});
+function update1(){
+  var a=+ax.value;axv.textContent=fmt(a);var c=classify(a);axc.textContent=c[0];axc.className='tag '+c[1];
+  var hi={};
+  LEADS.forEach(function(L){
+    var p=Math.cos((a-L.a)*Math.PI/180),k=cards[L.n],iso=Math.abs(p)<0.2;
+    qrs(k.s,p);k.v.textContent=iso?'≈ 0':(p>0?'+':'−')+Math.abs(p).toFixed(2);
+    k.d.className='lc'+(iso?' iso':'');if(iso)hi[L.n]='var(--c-orange)';
+  });
+  wheel(w1,{axis:a,hi:hi});
+}
+ax.addEventListener('input',update1);
+var drag=false;
+function fromPointer(e){
+  var r=w1.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*360-C,y=(e.clientY-r.top)/r.height*360-C;
+  if(x*x+y*y<100)return;
+  ax.value=Math.round(Math.atan2(y,x)*180/Math.PI/5)*5;update1();
+}
+w1.addEventListener('pointerdown',function(e){drag=true;w1.setPointerCapture(e.pointerId);fromPointer(e);});
+w1.addEventListener('pointermove',function(e){if(drag)fromPointer(e);});
+w1.addEventListener('pointerup',function(){drag=false;});
+w1.addEventListener('pointercancel',function(){drag=false;});
+update1();
+
+// --- Parte 2 ---
+var iso='aVL',sgn='+',isoB=document.getElementById('isoB'),sgnB=document.getElementById('sgnB'),w2=document.getElementById('w2');
+LEADS.forEach(function(L){
+  var b=document.createElement('button');b.type='button';b.textContent=L.n;b.dataset.n=L.n;
+  b.addEventListener('click',function(){iso=L.n;update2();});isoB.appendChild(b);
+});
+[['+','QRS positivo'],['−','QRS negativo']].forEach(function(o){
+  var b=document.createElement('button');b.type='button';b.dataset.s=o[0];b.textContent=o[1];
+  b.addEventListener('click',function(){sgn=o[0];update2();});sgnB.appendChild(b);
+});
+function update2(){
+  var L=byName(iso),P=byName(PERP[iso]),c1=norm(L.a+90),c2=norm(L.a-90);
+  var res=sgn==='+'?P.a:norm(P.a+180),other=norm(res+180);
+  Array.prototype.forEach.call(isoB.children,function(b){b.setAttribute('aria-pressed',b.dataset.n===iso);});
+  Array.prototype.forEach.call(sgnB.children,function(b){b.setAttribute('aria-pressed',b.dataset.s===sgn);b.textContent=(b.dataset.s==='+'?'Positivo':'Negativo')+' in '+P.n;});
+  document.getElementById('s1').innerHTML='<b class="n">1</b>'+L.n+' sta a '+fmt(L.a)+'. Aggiungi e togli 90°: '+fmt(L.a)+' + 90° = <b>'+fmt(c1)+'</b>; '+fmt(L.a)+' − 90° = <b>'+fmt(c2)+'</b>. L\'asse è su questa retta, ma non sai ancora in che verso.';
+  document.getElementById('s2').innerHTML='<b class="n">2</b>La retta coincide con '+P.n+' ('+fmt(P.a)+'). Guarda il QRS in '+P.n+': positivo → l\'asse punta verso '+fmt(P.a)+'; negativo → verso '+fmt(norm(P.a+180))+'.';
+  var c=classify(res);
+  document.getElementById('res').innerHTML='QRS '+(sgn==='+'?'positivo':'negativo')+' in '+P.n+' → asse ≈ <b>'+fmt(res)+'</b> ('+c[0].toLowerCase()+'). Si scarta '+fmt(other)+'.';
+  var hi={};hi[L.n]='var(--c-orange)';hi[P.n]='var(--accent)';
+  wheel(w2,{axis:res,hi:hi,arrow:'var(--c-green)',cand:[{a:res,ok:true},{a:other,ok:false}]});
+}
+update2();
+})();
+</script>
+</body>
+</html>
